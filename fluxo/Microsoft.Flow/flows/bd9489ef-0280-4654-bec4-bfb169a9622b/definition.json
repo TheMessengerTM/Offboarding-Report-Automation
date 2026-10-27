@@ -1,0 +1,308 @@
+{
+  "name": "00000000-0000-0000-0000-000000000000",
+  "id": "/providers/Microsoft.Flow/flows/00000000-0000-0000-0000-000000000000",
+  "type": "Microsoft.Flow/flows",
+  "properties": {
+    "apiId": "/providers/Microsoft.PowerApps/apis/shared_logicflows",
+    "displayName": "Gestão de Desligamento - Semanal (Pedido de demissão)",
+    "definition": {
+      "metadata": {
+        "processAdvisorMetadata": null,
+        "flowChargedByPaygo": null,
+        "flowclientsuspensionreason": "None",
+        "flowclientsuspensiontime": null,
+        "flowclientsuspensionreasondetails": null,
+        "provisioningMethod": "FromDefinition",
+        "failureAlertSubscription": true,
+        "creationSource": "Portal",
+        "modifiedSources": "Portal"
+      },
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "undefined",
+      "parameters": {
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        },
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        }
+      },
+      "triggers": {
+        "Recurrence": {
+          "recurrence": {
+            "frequency": "Week",
+            "interval": 1,
+            "timeZone": "E. South America Standard Time",
+            "schedule": {
+              "weekDays": [
+                "Monday"
+              ],
+              "hours": [
+                "8"
+              ]
+            }
+          },
+          "evaluatedRecurrence": {
+            "frequency": "Week",
+            "interval": 1,
+            "timeZone": "E. South America Standard Time",
+            "schedule": {
+              "weekDays": [
+                "Monday"
+              ],
+              "hours": [
+                "8"
+              ]
+            }
+          },
+          "metadata": {
+            "operationMetadataId": "d0b40902-514d-48b5-ae0b-ca17383e3fda"
+          },
+          "type": "Recurrence"
+        }
+      },
+      "actions": {
+        "Obter_itens": {
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "3bcf7832-260c-4678-a0c2-196a9a5bc16c"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "dataset": "https://SEU-TENANT.sharepoint.com/sites/SEU-SITE",
+              "table": "<<PREENCHER>>",
+              "$filter": "DatadaEntrevista ge '@{formatDateTime(addDays(utcNow(),-8),'yyyy-MM-dd')}'\nand DatadaEntrevista le '@{formatDateTime(addDays(utcNow(),-1),'yyyy-MM-dd')}'\nand Tipo_x0020_de_x0020_desligamento eq 'Pedido de demissão'",
+              "$orderby": "DatadaEntrevista asc"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "connectionName": "shared_sharepointonline",
+              "operationId": "GetItems"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Aplicar_a_cada": {
+          "foreach": "@outputs('Obter_itens')?['body/value']",
+          "actions": {
+            "Acrescentar_à_variável_de_cadeia": {
+              "type": "AppendToStringVariable",
+              "inputs": {
+                "name": "EmailHTML",
+                "value": "<tr>\n  <td>@{items('Aplicar_a_cada')?['Title']}</td>\n  <td>@{items('Aplicar_a_cada')?['RE']}</td> \n  <td>@{formatDateTime(items('Aplicar_a_cada')?['DatadeAdmiss_x00e3_o'],'dd/MM/yyyy')}</td>\n  <td>@{items('Aplicar_a_cada')?['Supervisor1/Value']}</td>\n  <td>@{items('Aplicar_a_cada')?['Posto']}</td>\n  <td>@{items('Aplicar_a_cada')?['Cargo']?['Value']}</td>\n  <td>@{formatDateTime(items('Aplicar_a_cada')?['DatadaEntrevista'],'dd/MM/yyyy')}</td>\n  <td>@{if(\nequals(toLower(string(item()?['RecolhidodoPosto'])), 'true'),\n'Sim',\n'Não'\n)}</td>\n  <td>@{if(\r\n  equals(item()?['Arrumououtroemprego'], true),\r\n  'Sim',\r\n  'Não'\r\n)}</td>\n  <td>@{items('Aplicar_a_cada')?['NegadapelaOpera_x00e7__x00e3_o_x/Value']}</td>\n  <td>@{items('Aplicar_a_cada')?['Hist_x00f3_ricodoFuncion_x00e1_r/Value']}</td>\n  <td>@{items('Aplicar_a_cada')?['Motivo']?['Value']}</td>\n  <td>@{items('Aplicar_a_cada')?['Discri_x00e7__x00e3_odomotivo']}</td>\n  <td>@{if(\nequals(toLower(string(item()?['DesligamentoEvitado'])), 'true'),\n'Sim',\n'Não'\n)}</td>\n  <td>@{if(\r\n  empty(items('Aplicar_a_cada')?['Tipo_x0020_de_x0020_desligamento']),\r\n  '',\r\n  first(items('Aplicar_a_cada')?['Tipo_x0020_de_x0020_desligamento'])?['Value']\r\n)}</td>\n  <td>@{items('Aplicar_a_cada')?['Reclama_x00e7__x00f5_es_x0020_ou']}</td>\n</tr>"
+              }
+            }
+          },
+          "runAfter": {
+            "Inicializar_variável": [
+              "Succeeded"
+            ]
+          },
+          "type": "Foreach"
+        },
+        "Inicializar_variável": {
+          "runAfter": {
+            "Obter_itens": [
+              "Succeeded"
+            ]
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "EmailHTML",
+                "type": "string",
+                "value": "<html>\n<body style=\"font-family: Arial, sans-serif; font-size: 14px;\">\n<h2>Gestão de Desligamentos</h2>\n\n<table border=\"1\" cellpadding=\"6\" cellspacing=\"0\" style=\"border-collapse: collapse; width: 100%;\">\n<tr style=\"background-color:#f2f2f2;\">\n  <th>Funcionário</th>\n  <th>RE</th> \n  <th>Data de Admissão</th>\n  <th>Supervisor</th>\n  <th>Posto</th>\n  <th>Cargo</th>\n  <th>Data da Entrevista</th>\n  <th>Recolhido do Posto</th>\n  <th>Arrumou outro emprego</th>\n  <th>Operacional Deseja Reversão?</th>\n  <th>Histórico do Funcionário</th>\n  <th>Motivo</th>\n  <th>Descrição</th>\n  <th>Desligamento Evitado</th>\n  <th>Tipo de Desligamento</th>\n  <th>Reclamações ou Observações</th>\n</tr>"
+              }
+            ]
+          }
+        },
+        "Acrescentar_à_variável_de_cadeia_1": {
+          "runAfter": {
+            "Aplicar_a_cada": [
+              "Succeeded"
+            ]
+          },
+          "type": "AppendToStringVariable",
+          "inputs": {
+            "name": "EmailHTML",
+            "value": "</table>\n<br>\n<p>Relatório gerado automaticamente pelo Power Automate.</p>\n</body>\n</html>"
+          }
+        },
+        "Enviar_um_email_(V2)": {
+          "runAfter": {
+            "Acrescentar_à_variável_de_cadeia_1": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "73ff588a-0606-44d5-9fbc-80951645b06d"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "emailMessage/To": "exemplo@exemplo.com;exemplo@exemplo.com;exemplo@exemplo.com",
+              "emailMessage/Subject": "Gestão de Desligamentos - Semanal (Pedido de demissão)",
+              "emailMessage/Body": "<p class=\"editor-paragraph\">@{variables('EmailHTML')}<br><br><br><br></p><br>",
+              "emailMessage/Importance": "Normal"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
+              "connectionName": "shared_office365",
+              "operationId": "SendEmailV2"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Atraso": {
+          "runAfter": {
+            "Enviar_um_email_(V2)": [
+              "Succeeded"
+            ]
+          },
+          "type": "Wait",
+          "inputs": {
+            "interval": {
+              "count": 3,
+              "unit": "Hour"
+            }
+          }
+        },
+        "Definir_variável": {
+          "runAfter": {
+            "Atraso": [
+              "Succeeded"
+            ]
+          },
+          "type": "SetVariable",
+          "inputs": {
+            "name": "EmailHTML",
+            "value": "''"
+          }
+        },
+        "Obter_itens_1": {
+          "runAfter": {
+            "Definir_variável": [
+              "Succeeded"
+            ]
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "dataset": "https://SEU-TENANT.sharepoint.com/sites/SEU-SITE",
+              "table": "<<PREENCHER>>",
+              "$filter": "DatadaEntrevista ge '@{formatDateTime(addDays(utcNow(),-8),'yyyy-MM-dd')}'\nand DatadaEntrevista le '@{formatDateTime(addDays(utcNow(),-1),'yyyy-MM-dd')}'\nand Tipo_x0020_de_x0020_desligamento eq 'Pedido de demissão'",
+              "$orderby": "DatadaEntrevista asc"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "connectionName": "shared_sharepointonline-2",
+              "operationId": "GetItems"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Aplicar_a_cada_1": {
+          "foreach": "@outputs('Obter_itens_1')?['body/value']",
+          "actions": {
+            "Acrescentar_à_variável_de_cadeia_2": {
+              "type": "AppendToStringVariable",
+              "inputs": {
+                "name": "EmailHTML2",
+                "value": "<tr>\n  <td>@{items('Aplicar_a_cada_1')?['Title']}</td>\n  <td>@{items('Aplicar_a_cada_1')?['RE']}</td> \n  <td>@{formatDateTime(items('Aplicar_a_cada_1')?['DatadeAdmiss_x00e3_o'],'dd/MM/yyyy')}</td>\n  <td>@{items('Aplicar_a_cada_1')?['Supervisor1/Value']}</td>\n  <td>@{items('Aplicar_a_cada_1')?['Posto']}</td>\n  <td>@{items('Aplicar_a_cada_1')?['Cargo']?['Value']}</td>\n  <td>@{formatDateTime(items('Aplicar_a_cada_1')?['DatadaEntrevista'],'dd/MM/yyyy')}</td>\n  <td>@{if(\nequals(toLower(string(item()?['RecolhidodoPosto'])), 'true'),\n'Sim',\n'Não'\n)}</td>\n  <td>@{if(\r\n  equals(item()?['Arrumououtroemprego'], true),\r\n  'Sim',\r\n  'Não'\r\n)}</td>\n  <td>@{items('Aplicar_a_cada_1')?['NegadapelaOpera_x00e7__x00e3_o_x/Value']}</td>\n  <td>@{items('Aplicar_a_cada_1')?['Hist_x00f3_ricodoFuncion_x00e1_r/Value']}</td>\n  <td>@{items('Aplicar_a_cada_1')?['Motivo']?['Value']}</td>\n  <td>@{items('Aplicar_a_cada_1')?['Discri_x00e7__x00e3_odomotivo']}</td>\n  <td>@{if(\nequals(toLower(string(item()?['DesligamentoEvitado'])), 'true'),\n'Sim',\n'Não'\n)}</td>\n  <td>@{if(\r\n  empty(items('Aplicar_a_cada_1')?['Tipo_x0020_de_x0020_desligamento']),\r\n  '',\r\n  first(items('Aplicar_a_cada_1')?['Tipo_x0020_de_x0020_desligamento'])?['Value']\r\n)}</td>\n  <td>@{items('Aplicar_a_cada_1')?['Reclama_x00e7__x00f5_es_x0020_ou']}</td>\n</tr>"
+              }
+            }
+          },
+          "runAfter": {
+            "Inicializar_variável_1": [
+              "Succeeded"
+            ]
+          },
+          "type": "Foreach"
+        },
+        "Acrescentar_à_variável_de_cadeia_3": {
+          "runAfter": {
+            "Aplicar_a_cada_1": [
+              "Succeeded"
+            ]
+          },
+          "type": "AppendToStringVariable",
+          "inputs": {
+            "name": "EmailHTML2",
+            "value": "</table>\n<br>\n<p>Relatório gerado automaticamente pelo Power Automate.</p>\n</body>\n</html>"
+          }
+        },
+        "Enviar_um_email_(V2)_1": {
+          "runAfter": {
+            "Acrescentar_à_variável_de_cadeia_3": [
+              "Succeeded"
+            ]
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "emailMessage/To": "exemplo@exemplo.com;exemplo@exemplo.com;exemplo@exemplo.com",
+              "emailMessage/Subject": "Gestão de Desligamentos - Semanal (Pedido de demissão)",
+              "emailMessage/Body": "<p class=\"editor-paragraph\">@{variables('EmailHTML2')}</p>",
+              "emailMessage/Importance": "Normal"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
+              "connectionName": "shared_office365",
+              "operationId": "SendEmailV2"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Inicializar_variável_1": {
+          "runAfter": {
+            "Obter_itens_1": [
+              "Succeeded"
+            ]
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "EmailHTML2",
+                "type": "string",
+                "value": "<html>\n<body style=\"font-family: Arial, sans-serif; font-size: 14px;\">\n<h2>Gestão de Desligamentos</h2>\n\n<table border=\"1\" cellpadding=\"6\" cellspacing=\"0\" style=\"border-collapse: collapse; width: 100%;\">\n<tr style=\"background-color:#f2f2f2;\">\n  <th>Funcionário</th>\n  <th>RE</th> \n  <th>Data de Admissão</th>\n  <th>Supervisor</th>\n  <th>Posto</th>\n  <th>Cargo</th>\n  <th>Data da Entrevista</th>\n  <th>Recolhido do Posto</th>\n  <th>Arrumou outro emprego</th>\n  <th>Operacional Deseja Reversão?</th>\n  <th>Histórico do Funcionário</th>\n  <th>Motivo</th>\n  <th>Descrição</th>\n  <th>Desligamento Evitado</th>\n  <th>Tipo de Desligamento</th>\n  <th>Reclamações ou Observações</th>\n</tr>"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "connectionReferences": {
+      "shared_sharepointonline": {
+        "connectionName": "shared-sharepointonl-00000000-0000-0000-0000-000000000000",
+        "source": "Embedded",
+        "id": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+        "tier": "NotSpecified",
+        "apiName": "sharepointonline",
+        "isProcessSimpleApiReferenceConversionAlreadyDone": false
+      },
+      "shared_office365": {
+        "connectionName": "shared-office365-00000000-0000-0000-0000-000000000000",
+        "source": "Embedded",
+        "id": "/providers/Microsoft.PowerApps/apis/shared_office365",
+        "tier": "NotSpecified",
+        "apiName": "office365",
+        "isProcessSimpleApiReferenceConversionAlreadyDone": false
+      },
+      "shared_sharepointonline-2": {
+        "connectionName": "shared-sharepointonl-00000000-0000-0000-0000-000000000000",
+        "source": "Embedded",
+        "id": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+        "tier": "NotSpecified",
+        "apiName": "sharepointonline",
+        "isProcessSimpleApiReferenceConversionAlreadyDone": false
+      }
+    },
+    "flowFailureAlertSubscribed": false,
+    "isManaged": false
+  }
+}
