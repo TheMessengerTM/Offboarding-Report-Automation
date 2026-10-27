@@ -1,0 +1,83 @@
+{
+  "schema": "1.0",
+  "details": {
+    "displayName": "Gestão de Desligamento - Mensal (Geral)",
+    "description": "",
+    "createdTime": "",
+    "packageTelemetryId": "",
+    "creator": "N/A",
+    "sourceEnvironment": ""
+  },
+  "resources": {
+    "8d1543af-bff0-475f-9203-23b2ac666a65": {
+      "type": "Microsoft.Flow/flows",
+      "suggestedCreationType": "Update",
+      "creationType": "Existing, New, Update",
+      "details": {
+        "displayName": "Gestão de Desligamento - Mensal (Geral)"
+      },
+      "configurableBy": "User",
+      "hierarchy": "Root",
+      "dependsOn": [
+        "767f2832-d297-468b-82b3-5a25b6022375",
+        "2bc54974-1dcc-415d-a5e1-db88c816b6cd",
+        "179a7c79-4c1e-4315-80a1-c82b94d87840",
+        "f6af4576-965b-43f7-8dd8-7932ff076fc2"
+      ]
+    },
+    "767f2832-d297-468b-82b3-5a25b6022375": {
+      "id": "/providers/Microsoft.PowerApps/apis/shared_office365",
+      "name": "shared_office365",
+      "type": "Microsoft.PowerApps/apis",
+      "suggestedCreationType": "Existing",
+      "details": {
+        "displayName": "Office 365 Outlook",
+        "iconUri": "https://static.powerapps.com/resource/ppcr/releases/v1.0.1831/1.0.1831.5113/office365/icon.png"
+      },
+      "configurableBy": "System",
+      "hierarchy": "Child",
+      "dependsOn": []
+    },
+    "2bc54974-1dcc-415d-a5e1-db88c816b6cd": {
+      "type": "Microsoft.PowerApps/apis/connections",
+      "suggestedCreationType": "Existing",
+      "creationType": "Existing",
+      "details": {
+        "displayName": "<<PREENCHER>>",
+        "iconUri": "https://static.powerapps.com/resource/ppcr/releases/v1.0.1831/1.0.1831.5113/office365/icon.png"
+      },
+      "configurableBy": "User",
+      "hierarchy": "Child",
+      "dependsOn": [
+        "767f2832-d297-468b-82b3-5a25b6022375"
+      ]
+    },
+    "179a7c79-4c1e-4315-80a1-c82b94d87840": {
+      "id": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+      "name": "shared_sharepointonline",
+      "type": "Microsoft.PowerApps/apis",
+      "suggestedCreationType": "Existing",
+      "details": {
+        "displayName": "SharePoint",
+        "iconUri": "https://static.powerapps.com/resource/ppcr/releases/v1.0.1827/1.0.1827.4913/sharepointonline/icon.png"
+      },
+      "configurableBy": "System",
+      "hierarchy": "Child",
+      "dependsOn": []
+    },
+    "f6af4576-965b-43f7-8dd8-7932ff076fc2": {
+      "type": "Microsoft.PowerApps/apis/connections",
+      "suggestedCreationType": "Existing",
+      "creationType": "Existing",
+      "details": {
+        "displayName": "<<PREENCHER>>",
+        "iconUri": "https://static.powerapps.com/resource/ppcr/releases/v1.0.1827/1.0.1827.4913/sharepointonline/icon.png"
+      },
+      "configurableBy": "User",
+      "hierarchy": "Child",
+      "dependsOn": [
+        "179a7c79-4c1e-4315-80a1-c82b94d87840"
+      ]
+    }
+  }
+}

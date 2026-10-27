@@ -1,0 +1,363 @@
+{
+  "name": "00000000-0000-0000-0000-000000000000",
+  "id": "/providers/Microsoft.Flow/flows/00000000-0000-0000-0000-000000000000",
+  "type": "Microsoft.Flow/flows",
+  "properties": {
+    "apiId": "/providers/Microsoft.PowerApps/apis/shared_logicflows",
+    "displayName": "Gestão de Desligamento - Mensal (Geral)",
+    "definition": {
+      "metadata": {
+        "processAdvisorMetadata": null,
+        "flowChargedByPaygo": null,
+        "flowclientsuspensionreason": "None",
+        "flowclientsuspensiontime": null,
+        "flowclientsuspensionreasondetails": null,
+        "provisioningMethod": "FromDefinition",
+        "failureAlertSubscription": true,
+        "creationSource": "Portal",
+        "modifiedSources": "Portal"
+      },
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "undefined",
+      "parameters": {
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        },
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        }
+      },
+      "triggers": {
+        "Recurrence": {
+          "recurrence": {
+            "frequency": "Month",
+            "interval": 1,
+            "timeZone": "E. South America Standard Time",
+            "startTime": "2026-02-01T08:00:00.000Z"
+          },
+          "evaluatedRecurrence": {
+            "frequency": "Month",
+            "interval": 1,
+            "timeZone": "E. South America Standard Time",
+            "startTime": "2026-02-01T08:00:00.000Z"
+          },
+          "metadata": {
+            "operationMetadataId": "1ede5295-755c-4e05-b353-0ff1f6f776a8"
+          },
+          "type": "Recurrence",
+          "conditions": []
+        }
+      },
+      "actions": {
+        "Enviar_um_email_(V2)_1": {
+          "runAfter": {
+            "Acrescentar_à_variável_de_cadeia_3": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "8c5d67c2-b252-42bc-aa4b-a20717241154"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "emailMessage/To": "exemplo@exemplo.com;exemplo@exemplo.com",
+              "emailMessage/Subject": "Relatório do Mês de @{concat(\n    toUpper(substring(formatDateTime(addDays(startOfMonth(utcNow()),-1),'MMMM','pt-BR'),0,1)),\n    substring(formatDateTime(addDays(startOfMonth(utcNow()),-1),'MMMM','pt-BR'),1)\n)} - (Geral)",
+              "emailMessage/Body": "<p class=\"editor-paragraph\">@{variables('EmailHTML2')}</p>",
+              "emailMessage/Importance": "Normal"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
+              "connectionName": "shared_office365",
+              "operationId": "SendEmailV2"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Acrescentar_à_variável_de_cadeia_3": {
+          "runAfter": {
+            "Aplicar_a_cada_1": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "e6fd4091-7553-41d1-9025-15fe5ea20ce6"
+          },
+          "type": "AppendToStringVariable",
+          "inputs": {
+            "name": "EmailHTML2",
+            "value": "</table>\n<br>\n<p>Relatório gerado automaticamente pelo Power Automate.</p>\n</body>\n</html>"
+          }
+        },
+        "Aplicar_a_cada_1": {
+          "foreach": "@outputs('Obter_itens_1')?['body/value']",
+          "actions": {
+            "Acrescentar_à_variável_de_cadeia_2": {
+              "metadata": {
+                "operationMetadataId": "626a08f8-2cc3-4326-9db2-22c4ae024467"
+              },
+              "type": "AppendToStringVariable",
+              "inputs": {
+                "name": "EmailHTML2",
+                "value": "<tr>\n  <td>@{items('Aplicar_a_cada_1')?['Title']}</td>\n  <td>@{items('Aplicar_a_cada_1')?['RE']}</td> \n  <td>@{formatDateTime(items('Aplicar_a_cada_1')?['DatadeAdmiss_x00e3_o'],'dd/MM/yyyy')}</td>\n  <td>@{items('Aplicar_a_cada_1')?['Supervisor1/Value']}</td>\n  <td>@{items('Aplicar_a_cada_1')?['Posto']}</td>\n  <td>@{items('Aplicar_a_cada_1')?['Cargo/Value']}</td>\n  <td>@{formatDateTime(items('Aplicar_a_cada_1')?['DatadaEntrevista'],'dd/MM/yyyy')}</td>\n  <td>@{if(\r\nequals(toLower(string(item()?['RecolhidodoPosto'])), 'true'),\r\n'Sim',\r\n'Não'\r\n)}</td>\n  <td>@{if(\r\nequals(toLower(string(item()?['Desaparecido'])), 'true'),\r\n'Sim',\r\n'Não'\r\n)}</td> \n  <td>@{if(\r\n  equals(item()?['Arrumououtroemprego'], true),\r\n  'Sim',\r\n  'Não'\r\n)}</td>\n  <td>@{items('Aplicar_a_cada_1')?['Sugest_x00e3_odeMelhoria']}</td> \n  <td>@{items('Aplicar_a_cada_1')?['Motivo/Value']}</td> \n  <td>@{items('Aplicar_a_cada_1')?['Discri_x00e7__x00e3_odomotivo']}</td>\n  <td>@{items('Aplicar_a_cada_1')?['NegadapelaOpera_x00e7__x00e3_o_x/Value']}</td>\n  <td>@{items('Aplicar_a_cada_1')?['Hist_x00f3_ricodoFuncion_x00e1_r/Value']}</td>\n  <td>@{if(\r\nequals(toLower(string(item()?['DesligamentoEvitado'])), 'true'),\r\n'Sim',\r\n'Não'\r\n)}</td>\n  <td>@{items('Aplicar_a_cada_1')?['Como_x0020_voc_x00ea__x0020_aval0/Value']}</td>\n  <td>@{items('Aplicar_a_cada_1')?['Como_x0020_voc_x00ea__x0020_aval1/Value']}</td>\n  <td>@{if(\r\nequals(toLower(string(item()?['Jáusouocanaldofuncionário?'])), 'true'),\r\n'Sim',\r\n'Não'\r\n)}</td>\n  <td>@{items('Aplicar_a_cada_1')?['Como_x0020_voc_x00ea__x0020_aval2/Value']}</td>\n  <td>@{items('Aplicar_a_cada_1')?['Como_x0020_voc_x00ea__x0020_aval3/Value']}</td>\n  <td>@{items('Aplicar_a_cada_1')?['Como_x0020_voc_x00ea__x0020_aval4/Value']}</td>\n  <td>@{items('Aplicar_a_cada_1')?['Como_x0020_voc_x00ea__x0020_aval5/Value']}</td>\n  <td>@{items('Aplicar_a_cada_1')?['Como_x0020_voc_x00ea__x0020_aval6/Value']}</td>\n  <td>@{items('Aplicar_a_cada_1')?['Como_x0020_voc_x00ea__x0020_aval7/Value']}</td>\n  <td>@{items('Aplicar_a_cada_1')?['Como_x0020_voc_x00ea__x0020_aval8/Value']}</td>\n  <td>@{items('Aplicar_a_cada_1')?['Voc_x00ea__x0020_recomendaria_x0/Value']}</td>\n  <td>@{items('Aplicar_a_cada_1')?['Em_x0020_uma_x0020_escala_x0020_/Value']}</td>\n  <td>@{items('Aplicar_a_cada_1')?['O_x0020_que_x0020_teria_x0020_au/Value']}</td>\n  <td>@{items('Aplicar_a_cada_1')?['Como_x0020_voc_x00ea__x0020_aval/Value']}</td>\n  <td>@{items('Aplicar_a_cada_1')?['Reclama_x00e7__x00f5_es_x0020_ou']}</td>\n  <td>@{if(\r\n  empty(items('Aplicar_a_cada_1')?['Tipo_x0020_de_x0020_desligamento']),\r\n  '',\r\n  first(items('Aplicar_a_cada_1')?['Tipo_x0020_de_x0020_desligamento'])?['Value']\r\n)}</td>\n</tr>"
+              }
+            }
+          },
+          "runAfter": {
+            "Inicializar_variável_3": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "d52acca5-1b4d-42ec-b9a8-17b00a16b175"
+          },
+          "type": "Foreach"
+        },
+        "Inicializar_variável_3": {
+          "runAfter": {
+            "Obter_itens_1": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "3e746280-4c81-45e2-8807-4d3cde8de31c"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "EmailHTML2",
+                "type": "string",
+                "value": "<html>\n<body style=\"font-family: Arial, sans-serif; font-size: 14px;\">\n\n<h2>Gestão de Desligamentos</h2>\n\n<table border=\"1\" cellpadding=\"6\" cellspacing=\"0\" style=\"border-collapse: collapse; width: 100%;\">\n\n<tr style=\"background-color:#f2f2f2;\">\n\n<th>Funcionário</th>\n<th>RE</th>\n<th>Data de Admissão</th>\n<th>Supervisor</th>\n<th>Posto</th>\n<th>Cargo</th>\n<th>Data da Entrevista</th>\n<th>Recolhido do Posto</th>\n<th>Desaparecido</th>\n<th>Arrumou outro emprego</th>\n<th>Sugestão de Melhoria</th>\n<th>Motivo</th>\n<th>Descrição do motivo</th>\n<th>Operacional Deseja Reversão?</th>\n<th>Histórico do Funcionário</th>\n<th>Desligamento Evitado</th>\n<th>Como você avalia o treinamento de integração recebido?</th>\n<th>Como você avalia o processo de admissão?</th>\n<th>Já usou o canal do funcionário?</th>\n<th>Como você avalia o atendimento e a disponibilidade do Canal do Funcionário?</th>\n<th>Como você avalia a qualidade e a disponibilidade do uniforme?</th>\n<th>Como você avalia o posto em que trabalhou (estrutura, rotina e condições de trabalho)?</th>\n<th>Como você avalia a atuação do seu supervisor?</th>\n<th>Como você avalia a atuação do seu líder?</th>\n<th>Como você avalia o relacionamento com a equipe de trabalho?</th>\n<th>Como você avalia a sua percepção geral sobre a empresa?</th>\n<th>Você recomendaria a empresa para um amigo ou familiar?</th>\n<th>Em uma escala de 0 a 10, qual era a sua intenção de permanecer na empresa antes de decidir pela saída?</th>\n<th>O que teria aumentado as chances de você permanecer na empresa?</th>\n<th>Como você avalia o processo seletivo?</th>\n<th>Reclamações ou observações</th>\n<th>Tipo de desligamento:</th>\n\n</tr>"
+              }
+            ]
+          }
+        },
+        "Obter_itens_1": {
+          "runAfter": {
+            "Definir_variável": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "ca94a5a3-65aa-437b-aabb-888b0626de05"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "dataset": "https://SEU-TENANT.sharepoint.com/sites/SEU-SITE",
+              "table": "<<PREENCHER>>",
+              "$filter": "DatadaEntrevista ge '@{variables('DataInicio')}'\nand DatadaEntrevista lt '@{variables('DataFim')}'",
+              "$orderby": "DatadaEntrevista asc"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "connectionName": "shared_sharepointonline",
+              "operationId": "GetItems"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Definir_variável": {
+          "runAfter": {
+            "Atraso": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "c5b16182-4b80-4f4e-bbcf-3f33682e5e82"
+          },
+          "type": "SetVariable",
+          "inputs": {
+            "name": "EmailHTML",
+            "value": "''"
+          }
+        },
+        "Atraso": {
+          "runAfter": {
+            "Enviar_um_email_(V2)": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "630fa1c7-5372-43bc-bf53-58cb862745ad"
+          },
+          "type": "Wait",
+          "inputs": {
+            "interval": {
+              "count": 3,
+              "unit": "Hour"
+            }
+          }
+        },
+        "Acrescentar_à_variável_de_cadeia_1": {
+          "runAfter": {
+            "Aplicar_a_cada": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "52c22ac5-f484-45a3-90f3-35f11c058bd3"
+          },
+          "type": "AppendToStringVariable",
+          "inputs": {
+            "name": "EmailHTML",
+            "value": "</table>\n<br>\n<p>Relatório gerado automaticamente pelo Power Automate.</p>\n</body>\n</html>"
+          }
+        },
+        "Aplicar_a_cada": {
+          "foreach": "@outputs('Obter_itens')?['body/value']",
+          "actions": {
+            "Acrescentar_à_variável_de_cadeia": {
+              "metadata": {
+                "operationMetadataId": "f04e5542-9b27-4c89-b4de-310e5d4ff943"
+              },
+              "type": "AppendToStringVariable",
+              "inputs": {
+                "name": "EmailHTML",
+                "value": "<tr>\n  <td>@{items('Aplicar_a_cada')?['Title']}</td>\n  <td>@{items('Aplicar_a_cada')?['RE']}</td> \n  <td>@{formatDateTime(items('Aplicar_a_cada')?['DatadeAdmiss_x00e3_o'],'dd/MM/yyyy')}</td>\n  <td>@{items('Aplicar_a_cada')?['Supervisor1/Value']}</td>\n  <td>@{items('Aplicar_a_cada')?['Posto']}</td>\n  <td>@{items('Aplicar_a_cada')?['Cargo']?['Value']}</td>\n  <td>@{formatDateTime(items('Aplicar_a_cada')?['DatadaEntrevista'],'dd/MM/yyyy')}</td>\n  <td>@{if(\nequals(toLower(string(item()?['RecolhidodoPosto'])), 'true'),\n'Sim',\n'Não'\n)}</td>\n  <td>@{if(\r\nequals(toLower(string(item()?['Desaparecido'])), 'true'),\r\n'Sim',\r\n'Não'\r\n)}</td> \n  <td>@{if(\n  equals(item()?['Arrumououtroemprego'], true),\n  'Sim',\n  'Não'\n)}</td>\n  <td>@{items('Aplicar_a_cada')?['Sugest_x00e3_odeMelhoria']}</td> \n  <td>@{items('Aplicar_a_cada')?['Motivo/Value']}</td> \n  <td>@{items('Aplicar_a_cada')?['Discri_x00e7__x00e3_odomotivo']}</td>\n  <td>@{items('Aplicar_a_cada')?['NegadapelaOpera_x00e7__x00e3_o_x/Value']}</td>\n  <td>@{items('Aplicar_a_cada')?['Hist_x00f3_ricodoFuncion_x00e1_r/Value']}</td>\n  <td>@{if(\nequals(toLower(string(item()?['DesligamentoEvitado'])), 'true'),\n'Sim',\n'Não'\n)}</td>\n  <td>@{items('Aplicar_a_cada')?['Como_x0020_voc_x00ea__x0020_aval0/Value']}</td>\n  <td>@{items('Aplicar_a_cada')?['Como_x0020_voc_x00ea__x0020_aval1/Value']}</td>\n  <td>@{if(\r\nequals(toLower(string(item()?['Jáusouocanaldofuncionário?'])), 'true'),\r\n'Sim',\r\n'Não'\r\n)}</td>\n  <td>@{items('Aplicar_a_cada')?['Como_x0020_voc_x00ea__x0020_aval2/Value']}</td>\n  <td>@{items('Aplicar_a_cada')?['Como_x0020_voc_x00ea__x0020_aval3/Value']}</td>\n  <td>@{items('Aplicar_a_cada')?['Como_x0020_voc_x00ea__x0020_aval4/Value']}</td>\n  <td>@{items('Aplicar_a_cada')?['Como_x0020_voc_x00ea__x0020_aval5/Value']}</td>\n  <td>@{items('Aplicar_a_cada')?['Como_x0020_voc_x00ea__x0020_aval6/Value']}</td>\n  <td>@{items('Aplicar_a_cada')?['Como_x0020_voc_x00ea__x0020_aval7/Value']}</td>\n  <td>@{items('Aplicar_a_cada')?['Como_x0020_voc_x00ea__x0020_aval8/Value']}</td>\n  <td>@{items('Aplicar_a_cada')?['Voc_x00ea__x0020_recomendaria_x0/Value']}</td>\n  <td>@{items('Aplicar_a_cada')?['Em_x0020_uma_x0020_escala_x0020_/Value']}</td>\n  <td>@{items('Aplicar_a_cada')?['O_x0020_que_x0020_teria_x0020_au/Value']}</td>\n  <td>@{items('Aplicar_a_cada')?['Como_x0020_voc_x00ea__x0020_aval/Value']}</td>\n  <td>@{items('Aplicar_a_cada')?['Reclama_x00e7__x00f5_es_x0020_ou']}</td>\n  <td>@{if(\r\n  empty(items('Aplicar_a_cada')?['Tipo_x0020_de_x0020_desligamento']),\r\n  '',\r\n  first(items('Aplicar_a_cada')?['Tipo_x0020_de_x0020_desligamento'])?['Value']\r\n)}</td>\n</tr>"
+              }
+            }
+          },
+          "runAfter": {
+            "Inicializar_variável": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "77a02092-6f99-4623-b554-66a7d738a8a9"
+          },
+          "type": "Foreach"
+        },
+        "Obter_itens": {
+          "runAfter": {
+            "Inicializar_variável_2": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "6f22dbba-0628-4cfe-b3a7-2ff7e969509f"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "dataset": "https://SEU-TENANT.sharepoint.com/sites/SEU-SITE",
+              "table": "<<PREENCHER>>",
+              "$filter": "DatadaEntrevista ge '@{variables('DataInicio')}'\nand DatadaEntrevista lt '@{variables('DataFim')}'",
+              "$orderby": "DatadaEntrevista asc"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "connectionName": "shared_sharepointonline",
+              "operationId": "GetItems"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Inicializar_variável_2": {
+          "runAfter": {
+            "Inicializar_variável_1": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "4496c263-2952-486b-98b9-6f1289612c79"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "DataFim",
+                "type": "string",
+                "value": "@addDays(startOfMonth(utcNow()), -1)"
+              }
+            ]
+          }
+        },
+        "Inicializar_variável_1": {
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "8cf08167-0014-4393-8a4d-0bb3e145e092"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "DataInicio",
+                "type": "string",
+                "value": "@startOfMonth(addToTime(utcNow(), -1, 'Month'))"
+              }
+            ]
+          }
+        },
+        "Enviar_um_email_(V2)": {
+          "runAfter": {
+            "Acrescentar_à_variável_de_cadeia_1": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "e99de2f4-6458-4dba-aae3-154d022046a0"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "emailMessage/To": "exemplo@exemplo.com;exemplo@exemplo.com",
+              "emailMessage/Subject": "Relatório do Mês de @{concat(\r\n    toUpper(substring(formatDateTime(addDays(startOfMonth(utcNow()),-1),'MMMM','pt-BR'),0,1)),\r\n    substring(formatDateTime(addDays(startOfMonth(utcNow()),-1),'MMMM','pt-BR'),1)\r\n)} - (Geral)",
+              "emailMessage/Body": "<p class=\"editor-paragraph\">@{variables('EmailHTML')}</p>",
+              "emailMessage/Importance": "Normal"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
+              "connectionName": "shared_office365",
+              "operationId": "SendEmailV2"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Inicializar_variável": {
+          "runAfter": {
+            "Obter_itens": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "b9a22c0a-97b3-4dca-a774-315f285ad083"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "EmailHTML",
+                "type": "string",
+                "value": "<html>\n<body style=\"font-family: Arial, sans-serif; font-size: 14px;\">\n\n<h2>Gestão de Desligamentos</h2>\n\n<table border=\"1\" cellpadding=\"6\" cellspacing=\"0\" style=\"border-collapse: collapse; width: 100%;\">\n\n<tr style=\"background-color:#f2f2f2;\">\n\n<th>Funcionário</th>\n<th>RE</th>\n<th>Data de Admissão</th>\n<th>Supervisor</th>\n<th>Posto</th>\n<th>Cargo</th>\n<th>Data da Entrevista</th>\n<th>Recolhido do Posto</th>\n<th>Desaparecido</th>\n<th>Arrumou outro emprego</th>\n<th>Sugestão de Melhoria</th>\n<th>Motivo</th>\n<th>Descrição do motivo</th>\n<th>Operacional Deseja Reversão?</th>\n<th>Histórico do Funcionário</th>\n<th>Desligamento Evitado</th>\n<th>Como você avalia o treinamento de integração recebido?</th>\n<th>Como você avalia o processo de admissão?</th>\n<th>Já usou o canal do funcionário?</th>\n<th>Como você avalia o atendimento e a disponibilidade do Canal do Funcionário?</th>\n<th>Como você avalia a qualidade e a disponibilidade do uniforme?</th>\n<th>Como você avalia o posto em que trabalhou (estrutura, rotina e condições de trabalho)?</th>\n<th>Como você avalia a atuação do seu supervisor?</th>\n<th>Como você avalia a atuação do seu líder?</th>\n<th>Como você avalia o relacionamento com a equipe de trabalho?</th>\n<th>Como você avalia a sua percepção geral sobre a empresa?</th>\n<th>Você recomendaria a empresa para um amigo ou familiar?</th>\n<th>Em uma escala de 0 a 10, qual era a sua intenção de permanecer na empresa antes de decidir pela saída?</th>\n<th>O que teria aumentado as chances de você permanecer na empresa?</th>\n<th>Como você avalia o processo seletivo?</th>\n<th>Reclamações ou observações</th>\n<th>Tipo de desligamento:</th>\n\n</tr>"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "connectionReferences": {
+      "shared_office365": {
+        "connectionName": "shared-office365-00000000-0000-0000-0000-000000000000",
+        "source": "Embedded",
+        "id": "/providers/Microsoft.PowerApps/apis/shared_office365",
+        "tier": "NotSpecified",
+        "apiName": "office365",
+        "isProcessSimpleApiReferenceConversionAlreadyDone": false
+      },
+      "shared_sharepointonline": {
+        "connectionName": "shared-sharepointonl-00000000-0000-0000-0000-000000000000",
+        "source": "Embedded",
+        "id": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+        "tier": "NotSpecified",
+        "apiName": "sharepointonline",
+        "isProcessSimpleApiReferenceConversionAlreadyDone": false
+      }
+    },
+    "flowFailureAlertSubscribed": false,
+    "isManaged": false
+  }
+}

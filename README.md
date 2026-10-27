@@ -6,7 +6,9 @@ Automações em **Power Automate** que transformam as entrevistas de desligament
 
 | Fluxo | Frequência | O que reporta |
 |-------|-----------|---------------|
-| [Desligamento Semanal — Pedido de demissão](fluxos/Desligamento-Semanal-Pedido-de-Demissao) | Segunda, 8h | Entrevistas da semana anterior com tipo de desligamento "Pedido de demissão" |
+| [Desligamento Semanal — Pedido de demissão](fluxos/Desligamento-Semanal-Pedido-de-Demissao) | Segunda, 8h | Entrevistas da semana anterior com tipo de desligamento "Pedido de demissão" (16 colunas) |
+| [Desligamento Semanal — Empresa e Acordo](fluxos/Desligamento-Semanal-Empresa-e-Acordo) | Segunda, 8h | Entrevistas da semana anterior com tipo "Demissão por parte da empresa" ou "Acordo" (15 colunas) |
+| [Desligamento Mensal — Geral](fluxos/Desligamento-Mensal-Geral) | Dia 1, 8h | Todas as entrevistas do mês anterior, de qualquer tipo, com as respostas da pesquisa de saída (32 colunas) |
 
 ![Power Automate](https://img.shields.io/badge/Power_Automate-fluxo_de_nuvem-0066FF?logo=powerautomate&logoColor=white)
 ![Microsoft Lists](https://img.shields.io/badge/Microsoft_Lists-SharePoint-0078D4?logo=microsoftsharepoint&logoColor=white)
@@ -39,10 +41,16 @@ flowchart LR
 4. **Prévia:** o relatório é enviado por e-mail à equipe responsável, que confere os dados e completa na lista o que tiver ficado faltando.
 5. **Versão final:** 3 horas depois, o fluxo **busca os registros de novo**, para pegar as correções, monta o relatório atualizado e envia a versão que segue para a diretoria.
 
+Os outros fluxos seguem a mesma estrutura e mudam só o filtro e as colunas:
+
+- **Semanal — Empresa e Acordo:** mesmo período (D-8 a D-1), filtrando os tipos **"Demissão por parte da empresa"** ou **"Acordo"**. Separar os relatórios por tipo permite olhar à parte as saídas que partiram do funcionário e as que partiram da empresa.
+- **Mensal — Geral:** roda no dia 1 e cobre o mês anterior inteiro, sem filtro de tipo. O período é calculado em variáveis (`startOfMonth`), e o assunto do e-mail traz o nome do mês em português (ex.: "Relatório do Mês de Setembro - (Geral)"). Além dos dados do desligamento, a tabela inclui as respostas da **pesquisa de saída** (integração, admissão, uniforme, posto, supervisor, líder, equipe, canal do funcionário, recomendação da empresa e intenção de permanência de 0 a 10), usadas pela Psicologia na análise mensal.
+
 ## Decisões de projeto
 
 - **Prévia antes da versão final:** quem preenche a lista revisa o relatório antes de ele chegar à diretoria. Uma pausa de 3 horas dá tempo de corrigir sem atrasar o envio.
 - **Nova consulta, não reenvio:** a versão final não reaproveita a primeira tabela. Ela consulta a lista outra vez, então qualquer correção feita nesse intervalo entra no relatório.
+- **Um fluxo por recorte:** cada relatório (por tipo de desligamento e por período) é um fluxo separado, com destinatários próprios. Mudar um deles não afeta os outros.
 - **Filtro no servidor:** o período e o tipo de desligamento são filtrados na própria consulta ao SharePoint (OData `$filter`), e o fluxo só recebe os registros que interessam.
 - **Campos de escolha e Sim/Não legíveis:** colunas de escolha, pessoa e booleanas são convertidas em texto (`Sim`/`Não`, valor da opção) direto nas expressões, para a tabela ficar pronta para leitura.
 
@@ -64,7 +72,7 @@ fluxos/
 2. Na importação, escolha **Criar como novo** e selecione (ou crie) as conexões de **SharePoint** e **Office 365 Outlook**.
 3. Depois de importar, abra o fluxo e, nas duas ações **Obter itens**, selecione o seu site e a sua lista (os valores originais foram trocados por `SEU-TENANT`/`SEU-SITE` e `<<PREENCHER>>`).
 4. Nas duas ações **Enviar um email (V2)**, coloque os destinatários. Se quiser, mande a versão final direto para a diretoria.
-5. A lista precisa ter as colunas usadas no filtro e na tabela: `DatadaEntrevista`, `Tipo de desligamento`, `RE`, `DatadeAdmissão`, `Supervisor1`, `Posto`, `Cargo`, `RecolhidodoPosto`, `Arrumououtroemprego`, `Motivo`, `Discriçãodomotivo`, `DesligamentoEvitado` entre outras (veja `definition.json`). Se os nomes internos forem diferentes, ajuste as expressões.
+5. A lista precisa ter as colunas usadas no filtro e na tabela: `DatadaEntrevista`, `Tipo de desligamento`, `RE`, `DatadeAdmissão`, `Supervisor1`, `Posto`, `Cargo`, `RecolhidodoPosto`, `Arrumououtroemprego`, `Motivo`, `Discriçãodomotivo`, `DesligamentoEvitado` entre outras (veja `definition.json`). O relatório mensal usa também as colunas da pesquisa de saída. Se os nomes internos forem diferentes, ajuste as expressões.
 6. Ative o fluxo.
 
 ## Segurança
