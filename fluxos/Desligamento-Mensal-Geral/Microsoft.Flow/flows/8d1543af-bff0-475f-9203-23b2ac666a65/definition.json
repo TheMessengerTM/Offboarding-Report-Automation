@@ -271,7 +271,7 @@
               {
                 "name": "DataFim",
                 "type": "string",
-                "value": "@addDays(startOfMonth(utcNow()), -1)"
+                "value": "@startOfMonth(utcNow())"
               }
             ]
           }
