@@ -1,6 +1,12 @@
-# Offboarding Report Automation — Relatório semanal de pedidos de demissão
+# Offboarding Report Automation — Relatórios de desligamento para RH e Psicologia
 
-Automação em **Power Automate** que, toda segunda-feira, reúne os pedidos de demissão registrados na semana anterior numa lista do **SharePoint (Microsoft Lists)** e envia por **e-mail (Outlook)** um relatório em tabela. Primeiro vai uma **prévia para conferência** da equipe e, 3 horas depois, a **versão final**, já com as correções feitas na lista, que é encaminhada à diretoria.
+Automações em **Power Automate** que transformam as entrevistas de desligamento registradas numa lista do **SharePoint (Microsoft Lists)** em relatórios periódicos por **e-mail (Outlook)**, usados no acompanhamento do RH e da área de Psicologia. Cada relatório sai primeiro como **prévia para conferência** da equipe e, 3 horas depois, como **versão final**, já com as correções feitas na lista, que é encaminhada à diretoria.
+
+## Fluxos
+
+| Fluxo | Frequência | O que reporta |
+|-------|-----------|---------------|
+| [Desligamento Semanal — Pedido de demissão](fluxos/Desligamento-Semanal-Pedido-de-Demissao) | Segunda, 8h | Entrevistas da semana anterior com tipo de desligamento "Pedido de demissão" |
 
 ![Power Automate](https://img.shields.io/badge/Power_Automate-fluxo_de_nuvem-0066FF?logo=powerautomate&logoColor=white)
 ![Microsoft Lists](https://img.shields.io/badge/Microsoft_Lists-SharePoint-0078D4?logo=microsoftsharepoint&logoColor=white)
@@ -10,9 +16,11 @@ Automação em **Power Automate** que, toda segunda-feira, reúne os pedidos de 
 
 ## O problema
 
-As entrevistas de desligamento ficam registradas numa lista do SharePoint do RH: quem saiu, supervisor, posto, cargo, motivo, se o desligamento poderia ter sido evitado e assim por diante. Para acompanhar os pedidos de demissão, a diretoria precisava de um resumo semanal, e alguém tinha que filtrar a lista, copiar os dados para um e-mail e conferir se nada estava faltando. Era um trabalho repetitivo, e os campos esquecidos só apareciam depois que o relatório já tinha sido enviado.
+As entrevistas de desligamento ficam registradas numa lista do SharePoint do RH: quem saiu, supervisor, posto, cargo, motivo, se o desligamento poderia ter sido evitado e assim por diante. Para acompanhar os desligamentos, a diretoria precisava de resumos periódicos, e alguém tinha que filtrar a lista, copiar os dados para um e-mail e conferir se nada estava faltando. Era um trabalho repetitivo, e os campos esquecidos só apareciam depois que o relatório já tinha sido enviado.
 
 ## Como funciona
+
+Exemplo do fluxo semanal de pedidos de demissão:
 
 ```mermaid
 flowchart LR
@@ -41,16 +49,18 @@ flowchart LR
 ## Estrutura do repositório
 
 ```
-Offboarding-Management.zip      ← pacote pronto para importar no Power Automate
-fluxo/                          ← o mesmo pacote descompactado, para leitura
-├── manifest.json               ← recursos e conexões do pacote
-└── Microsoft.Flow/flows/<id>/
-    └── definition.json         ← definição do fluxo (gatilho, ações e expressões)
+pacotes/
+└── <Nome-do-fluxo>.zip           ← pacote pronto para importar no Power Automate
+fluxos/
+└── <Nome-do-fluxo>/              ← o mesmo pacote descompactado, para leitura
+    ├── manifest.json             ← recursos e conexões do pacote
+    └── Microsoft.Flow/flows/<id>/
+        └── definition.json       ← definição do fluxo (gatilho, ações e expressões)
 ```
 
 ## Como usar
 
-1. No Power Automate: **Meus fluxos → Importar → Importar pacote (herdado)** e selecione `Offboarding-Management.zip`.
+1. No Power Automate: **Meus fluxos → Importar → Importar pacote (herdado)** e selecione o `.zip` desejado em `pacotes/`.
 2. Na importação, escolha **Criar como novo** e selecione (ou crie) as conexões de **SharePoint** e **Office 365 Outlook**.
 3. Depois de importar, abra o fluxo e, nas duas ações **Obter itens**, selecione o seu site e a sua lista (os valores originais foram trocados por `SEU-TENANT`/`SEU-SITE` e `<<PREENCHER>>`).
 4. Nas duas ações **Enviar um email (V2)**, coloque os destinatários. Se quiser, mande a versão final direto para a diretoria.
@@ -59,4 +69,4 @@ fluxo/                          ← o mesmo pacote descompactado, para leitura
 
 ## Segurança
 
-O pacote publicado aqui não tem dados de funcionários, endereços do SharePoint, IDs de listas, do tenant ou de usuários, nem e-mails ou contas de conexão. Todos os valores sensíveis foram substituídos por marcadores.
+Os pacotes publicados aqui não têm dados de funcionários, endereços do SharePoint, IDs de listas, do tenant ou de usuários, nem e-mails ou contas de conexão. Todos os valores sensíveis foram substituídos por marcadores.
